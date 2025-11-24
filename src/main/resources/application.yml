@@ -1,0 +1,17 @@
+spring:
+  config.activate.on-profile: default
+  threads.virtual.enabled: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/orders_service
+    username: root
+    password: "mock_password"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database: MYSQL
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
