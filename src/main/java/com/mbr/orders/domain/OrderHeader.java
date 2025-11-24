@@ -3,8 +3,6 @@ package com.mbr.orders.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.query.Order;
-
 import java.math.BigDecimal;
 
 @Getter

@@ -1,10 +1,9 @@
 package com.mbr.orders.service;
 
 import com.mbr.orders.domain.Customer;
-import com.mbr.orders.domain.OrderHeader;
 import com.mbr.orders.repository.CustomerRepository;
-import com.mbr.orders.controller.dto.CreateCustomerRequest;
-import com.mbr.orders.controller.dto.CreateCustomerResponse;
+import com.mbr.orders.dto.CreateCustomerRequest;
+import com.mbr.orders.dto.CreateCustomerResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 

@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -33,7 +32,7 @@ public class Customer extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private CustomerState state;
 
-    public Customer (String email, String fullName) {
+    public Customer(String email, String fullName) {
         this.email = email;
         this.fullName = fullName;
         this.state = CustomerState.ACTIVE;

@@ -1,12 +1,14 @@
 package com.mbr.orders.service;
 
-import com.mbr.orders.controller.dto.*;
 import com.mbr.orders.domain.Customer;
 import com.mbr.orders.domain.OrderHeader;
 import com.mbr.orders.domain.OrderItem;
+import com.mbr.orders.dto.CreateOrderRequest;
+import com.mbr.orders.dto.CreateOrderResponse;
+import com.mbr.orders.dto.OrderItemRequest;
+import com.mbr.orders.dto.OrderItemResponse;
 import com.mbr.orders.repository.OrderItemRepository;
 import com.mbr.orders.repository.OrderRepository;
-import org.hibernate.query.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,17 +36,17 @@ public class OrderService {
                 createOrderRequest.getCustomerId(), Customer.CustomerState.ACTIVE);
 
         if (_customer.isEmpty()) {
-            throw new RuntimeException("Customer not found");
+            throw new IllegalArgumentException("Customer not found or blocked");
 
         }
         // order must include at least one item
         if (createOrderRequest.getOrderItems().isEmpty()) {
-            throw new RuntimeException("Order must contain at least one item");
+            throw new IllegalArgumentException("Order must contain at least one item");
         }
         // item qty check
         for (OrderItemRequest item : createOrderRequest.getOrderItems()) {
             if (item.getQuantity() < 1) {
-                throw new RuntimeException("Order item quantity must be at least 1");
+                throw new IllegalArgumentException("Order item quantity must be at least 1");
             }
         }
 

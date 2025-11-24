@@ -1,9 +1,7 @@
 package com.mbr.orders.controller;
 
-import com.mbr.orders.domain.Customer;
 import com.mbr.orders.service.CustomerService;
-import com.mbr.orders.controller.dto.CreateCustomerRequest;
-import com.mbr.orders.controller.dto.CreateCustomerResponse;
+import com.mbr.orders.dto.CreateCustomerRequest;
 import com.mbr.orders.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;

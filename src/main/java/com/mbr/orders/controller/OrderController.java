@@ -1,12 +1,11 @@
 package com.mbr.orders.controller;
 
 
-import com.mbr.orders.controller.dto.CreateOrderRequest;
+import com.mbr.orders.dto.CreateOrderRequest;
 import com.mbr.orders.domain.OrderHeader;
 import com.mbr.orders.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +22,8 @@ public class OrderController {
         try {
             var response = orderService.createOrder(orderRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (DataIntegrityViolationException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage()); // that's for 409 code.
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
