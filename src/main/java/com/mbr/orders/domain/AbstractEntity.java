@@ -20,8 +20,4 @@ public abstract class AbstractEntity implements Serializable {
     @CreatedDate
     private LocalDateTime createdAt;
 
-//    @Column(name = "udate")
-//    @LastModifiedDate
-//    private LocalDateTime modifiedDate;
-
 }

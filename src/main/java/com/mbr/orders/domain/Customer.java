@@ -37,8 +37,5 @@ public class Customer extends AbstractEntity {
         this.fullName = fullName;
         this.state = CustomerState.ACTIVE;
     }
-
-//  private LocalDateTime createdDate;
-
 }
 

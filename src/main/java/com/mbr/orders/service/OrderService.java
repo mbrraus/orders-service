@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,7 +31,11 @@ public class OrderService {
     @Autowired
     private OrderItemRepository orderItemRepository;
 
+    @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
+
+        var orderItems = createOrderRequest.getOrderItems();
+
         // customer must exist and not blocked
         Optional<Customer> _customer = customerService.getCustomerByIdAndStatus(
                 createOrderRequest.getCustomerId(), Customer.CustomerState.ACTIVE);
@@ -40,34 +45,26 @@ public class OrderService {
 
         }
         // order must include at least one item
-        if (createOrderRequest.getOrderItems().isEmpty()) {
+        if (orderItems.isEmpty()) {
             throw new IllegalArgumentException("Order must contain at least one item");
         }
         // item qty check
-        for (OrderItemRequest item : createOrderRequest.getOrderItems()) {
+        for (OrderItemRequest item : orderItems) {
             if (item.getQuantity() < 1) {
                 throw new IllegalArgumentException("Order item quantity must be at least 1");
             }
         }
 
-        // calculate total amount
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        for (OrderItemRequest item : createOrderRequest.getOrderItems()) {
-            BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-            BigDecimal unitPrice = item.getUnitPrice();
-            totalAmount = totalAmount.add(qty.multiply(unitPrice));
-        } // check stream usage here
-
         OrderHeader orderHeader = new OrderHeader();
         orderHeader.setCustomer(_customer.get());
-        orderHeader.setTotalAmount(totalAmount);
+        orderHeader.setTotalAmount(calculateTotalAmount(orderItems));
         orderHeader.setOrderStatus(OrderHeader.OrderStatus.NEW);
 
         OrderHeader createdOrderHeader = orderRepository.save(orderHeader);
 
         List<OrderItem> createdOrderItems = new ArrayList<>();
 
-        for (OrderItemRequest item : createOrderRequest.getOrderItems()) {
+        for (OrderItemRequest item : orderItems) {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrderHeader(createdOrderHeader);
             orderItem.setProductSku(item.getSku());
@@ -80,24 +77,8 @@ public class OrderService {
             orderItemRepository.save(orderItem);
 
         }
-        // map entities → DTO
-        List<OrderItemResponse> itemResponses = createdOrderItems.stream()
-                .map(oi -> new OrderItemResponse(
-                        oi.getProductSku(),
-                        oi.getProductName(),
-                        oi.getUnitPrice(),
-                        oi.getQuantity()
-                ))
-                .toList();
-        return new CreateOrderResponse(
-                createdOrderHeader.getId(),
-                createdOrderHeader.getCustomer().getId(),
-                createdOrderHeader.getTotalAmount(),
-                itemResponses,
-                createdOrderHeader.getOrderStatus().name(),
-                createdOrderHeader.getCreatedAt()
 
-        );
+        return convertToOrderResponse(createdOrderHeader);
 
 
     }
@@ -136,6 +117,16 @@ public class OrderService {
 
         return orders.map(this::convertToOrderResponse);
 
+    }
+
+    private BigDecimal calculateTotalAmount(List<OrderItemRequest> orderItems) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (OrderItemRequest item : orderItems) {
+            BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
+            BigDecimal unitPrice = item.getUnitPrice();
+            totalAmount = totalAmount.add(qty.multiply(unitPrice));
+        } // check stream usage here
+        return totalAmount;
     }
 
     private Pageable makePaging(int page, int size, String sortParam) {

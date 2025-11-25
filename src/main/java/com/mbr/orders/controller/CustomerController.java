@@ -2,7 +2,6 @@ package com.mbr.orders.controller;
 
 import com.mbr.orders.service.CustomerService;
 import com.mbr.orders.dto.CreateCustomerRequest;
-import com.mbr.orders.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -14,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
     @Autowired
     private CustomerService customerService;
-    @Autowired
-    private OrderService orderService;
 
     @PostMapping
     public ResponseEntity<?> createCustomer(@RequestBody CreateCustomerRequest customerRequest) {
@@ -36,7 +33,5 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
     }
-
-
 
 }
