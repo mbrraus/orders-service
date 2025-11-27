@@ -4,8 +4,11 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/orders_service
     username: root
-    password: "mock_password"
+    password: "}s9kKa@c3R6/"
     driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
   jpa:
     database: MYSQL
     show-sql: true
