@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,6 +26,9 @@ public class OrderHeader extends AbstractEntity {
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
+    @OneToMany(mappedBy = "orderHeader", cascade = CascadeType.ALL)
+    private List<OrderItem> items = new ArrayList<>();
 
     @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;

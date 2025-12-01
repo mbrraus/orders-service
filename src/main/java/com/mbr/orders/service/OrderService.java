@@ -1,13 +1,12 @@
 package com.mbr.orders.service;
 
+import com.mbr.orders.mapper.OrderMapper;
 import com.mbr.orders.domain.Customer;
 import com.mbr.orders.domain.OrderHeader;
 import com.mbr.orders.domain.OrderItem;
 import com.mbr.orders.dto.CreateOrderRequest;
 import com.mbr.orders.dto.CreateOrderResponse;
 import com.mbr.orders.dto.OrderItemRequest;
-import com.mbr.orders.dto.OrderItemResponse;
-import com.mbr.orders.repository.OrderItemRepository;
 import com.mbr.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +27,7 @@ public class OrderService {
     @Autowired
     private CustomerService customerService;
     @Autowired
-    private OrderItemRepository orderItemRepository;
+    private OrderMapper orderMapper;
 
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
@@ -62,34 +60,23 @@ public class OrderService {
 
         OrderHeader createdOrderHeader = orderRepository.save(orderHeader);
 
-        List<OrderItem> createdOrderItems = new ArrayList<>();
-
         for (OrderItemRequest item : orderItems) {
-            OrderItem orderItem = new OrderItem();
+            OrderItem orderItem = orderMapper.toOrderItem(item);
             orderItem.setOrderHeader(createdOrderHeader);
-            orderItem.setProductSku(item.getSku());
-            orderItem.setQuantity(item.getQuantity());
-
-            orderItem.setUnitPrice(item.getUnitPrice());
-            orderItem.setProductName("todo"); // that will come from Category
-
-            createdOrderItems.add(orderItem);
-            orderItemRepository.save(orderItem);
-
+            createdOrderHeader.getItems().add(orderItem);
         }
-
-        return convertToOrderResponse(createdOrderHeader);
-
-
+        return orderMapper.toCreateOrderResponse(createdOrderHeader);
     }
 
+    @Transactional
     public CreateOrderResponse getOrderById(Long id) {
         OrderHeader order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-        return convertToOrderResponse(order);
+        return orderMapper.toCreateOrderResponse(order);
 
     }
 
+    @Transactional
     public Page<CreateOrderResponse> getOrders(
             Long customerId,
             OrderHeader.OrderStatus status,
@@ -97,7 +84,6 @@ public class OrderService {
             int size,
             String sortParam
     ) {
-
 
         // paging
         Pageable pageable = makePaging(page, size, sortParam);
@@ -115,8 +101,7 @@ public class OrderService {
             orders = orderRepository.findAll(pageable);
         }
 
-        return orders.map(this::convertToOrderResponse);
-
+        return orders.map(orderMapper::toCreateOrderResponse);
     }
 
     private BigDecimal calculateTotalAmount(List<OrderItemRequest> orderItems) {
@@ -141,27 +126,6 @@ public class OrderService {
             sort = sort.ascending();
         }
         return PageRequest.of(page, size, sort);
-
-    }
-
-    private CreateOrderResponse convertToOrderResponse(OrderHeader order) {
-        List<OrderItem> items = orderItemRepository.findByOrderHeader_Id(order.getId());
-        List<OrderItemResponse> itemResponses = items.stream()
-                .map(oi -> new OrderItemResponse(
-                        oi.getProductSku(),
-                        oi.getProductName(),
-                        oi.getUnitPrice(),
-                        oi.getQuantity()
-                ))
-                .toList();
-        return new CreateOrderResponse(
-                order.getId(),
-                order.getCustomer().getId(),
-                order.getTotalAmount(),
-                itemResponses,
-                order.getOrderStatus().name(),
-                order.getCreatedAt()
-        );
     }
 
 }

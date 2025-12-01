@@ -76,7 +76,7 @@ Create a new order.
 {
   "customerId": 1,
   "orderItems": [
-      {"sku": "p-1001", "quantity": 1, "unitPrice":20} 
+      {"productSku": "p-1001", "quantity": 1, "unitPrice":20} 
     ]
 }
 ```
@@ -102,12 +102,12 @@ Create a new order.
 
 ```json
 {
-    "orderId": 1,
+    "id": 1,
     "customerId": 1,
     "totalAmount": 20,
     "orderItems": [
         {
-          "sku": "p-1001",
+          "productSku": "p-1001",
           "productName": "todo",
           "unitPrice": 20,
           "quantity": 1
@@ -126,12 +126,12 @@ Returns a single order by ID.
 
 ```json
 {
-    "orderId": 1,
+    "id": 1,
     "customerId": 1,
     "totalAmount": 20.00,
-    "orderItems": [
+    "items": [
     {
-        "sku": "p-1001",
+        "productSku": "p-1001",
         "productName": "todo",
         "unitPrice": 20.00,
         "quantity": 1
