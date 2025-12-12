@@ -7,6 +7,7 @@ import com.mbr.orders.dto.CreateCustomerResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -63,6 +64,10 @@ public class CustomerService {
 
     public Optional<Customer> getCustomerByIdAndStatus(Long id, Customer.CustomerState state) {
         return customerRepository.findByIdAndState(id,state);
+    }
+
+    public List<Customer> getAllCustomers() {
+        return customerRepository.findAll();
     }
 
 }

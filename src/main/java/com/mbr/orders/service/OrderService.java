@@ -76,7 +76,7 @@ public class OrderService {
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<CreateOrderResponse> getOrders(
             Long customerId,
             OrderHeader.OrderStatus status,

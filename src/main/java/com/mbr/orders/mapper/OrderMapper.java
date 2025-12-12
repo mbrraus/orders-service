@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
     @Mapping(target = "productName", constant = "todo")
-    @Mapping(target = "orderHeader", ignore = true)
+    @Mapping(target = "orderHeader", ignore = true) // setting it manually, ignore
     OrderItem toOrderItem(OrderItemRequest request);
 
     @Mapping(target = "customerId", source = "customer.id")

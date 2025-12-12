@@ -20,5 +20,4 @@ public interface OrderRepository extends JpaRepository<OrderHeader, Long> {
             OrderHeader.OrderStatus status,
             Pageable pageable
     );
-
 }

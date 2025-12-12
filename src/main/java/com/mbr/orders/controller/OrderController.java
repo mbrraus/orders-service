@@ -1,6 +1,7 @@
 package com.mbr.orders.controller;
 
 
+import com.mbr.orders.domain.Customer;
 import com.mbr.orders.dto.CreateOrderRequest;
 import com.mbr.orders.domain.OrderHeader;
 import com.mbr.orders.service.OrderService;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/orders")
@@ -46,7 +49,7 @@ public class OrderController {
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) OrderHeader.OrderStatus status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "createdAt,desc") String sort) {
         return ResponseEntity.ok(
                 orderService.getOrders(customerId, status, page, size, sort)

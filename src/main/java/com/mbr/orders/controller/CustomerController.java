@@ -1,5 +1,6 @@
 package com.mbr.orders.controller;
 
+import com.mbr.orders.domain.Customer;
 import com.mbr.orders.service.CustomerService;
 import com.mbr.orders.dto.CreateCustomerRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/customers")
@@ -32,6 +35,11 @@ public class CustomerController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
+    }
+
+    @GetMapping
+    public List<Customer> getAllCustomers() {
+        return customerService.getAllCustomers();
     }
 
 }
