@@ -1,5 +1,6 @@
 package com.mbr.orders.service;
 
+import com.mbr.orders.dto.ProductDto;
 import com.mbr.orders.mapper.OrderMapper;
 import com.mbr.orders.domain.Customer;
 import com.mbr.orders.domain.OrderHeader;
@@ -13,11 +14,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +30,9 @@ public class OrderService {
     private CustomerService customerService;
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private CatalogClient catalogClient;
 
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
@@ -46,26 +51,42 @@ public class OrderService {
         if (orderItems.isEmpty()) {
             throw new IllegalArgumentException("Order must contain at least one item");
         }
-        // item qty check
-        for (OrderItemRequest item : orderItems) {
-            if (item.getQuantity() < 1) {
-                throw new IllegalArgumentException("Order item quantity must be at least 1");
-            }
-        }
 
         OrderHeader orderHeader = new OrderHeader();
         orderHeader.setCustomer(_customer.get());
-        orderHeader.setTotalAmount(calculateTotalAmount(orderItems));
         orderHeader.setOrderStatus(OrderHeader.OrderStatus.NEW);
-
+        orderHeader.setTotalAmount(BigDecimal.ZERO);
         OrderHeader createdOrderHeader = orderRepository.save(orderHeader);
 
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
         for (OrderItemRequest item : orderItems) {
+
+            // item qty check
+            if (item.getQuantity() < 1) {
+                throw new IllegalArgumentException("Order item quantity must be at least 1");
+            }
+            ProductDto product = catalogClient.getBySku(item.getProductSku());
+            if (!"ACTIVE".equals(product.getStatus())) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Product is not active"
+                );
+            }
+
             OrderItem orderItem = orderMapper.toOrderItem(item);
+            orderItem.setProductName(product.getName());
+            orderItem.setUnitPrice(product.getPrice());
+
             orderItem.setOrderHeader(createdOrderHeader);
             createdOrderHeader.getItems().add(orderItem);
+
+            totalAmount = totalAmount.add(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+
         }
+        createdOrderHeader.setTotalAmount(totalAmount);
         return orderMapper.toCreateOrderResponse(createdOrderHeader);
+
     }
 
     @Transactional
@@ -102,16 +123,6 @@ public class OrderService {
         }
 
         return orders.map(orderMapper::toCreateOrderResponse);
-    }
-
-    private BigDecimal calculateTotalAmount(List<OrderItemRequest> orderItems) {
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        for (OrderItemRequest item : orderItems) {
-            BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-            BigDecimal unitPrice = item.getUnitPrice();
-            totalAmount = totalAmount.add(qty.multiply(unitPrice));
-        } // check stream usage here
-        return totalAmount;
     }
 
     private Pageable makePaging(int page, int size, String sortParam) {

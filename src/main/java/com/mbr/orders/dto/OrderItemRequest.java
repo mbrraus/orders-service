@@ -10,5 +10,4 @@ import java.math.BigDecimal;
 public class OrderItemRequest {
     private String productSku;
     private int quantity;
-    private BigDecimal unitPrice; // this normally needs to come from Catalog service
 }
