@@ -76,8 +76,8 @@ Create a new order.
 {
   "customerId": 1,
   "orderItems": [
-      {"productSku": "p-1001", "quantity": 1, "unitPrice":20} 
-    ]
+    {"productSku": "p-1001", "quantity": 1}
+  ]
 }
 ```
 
@@ -93,10 +93,17 @@ Create a new order.
 
 - **Item quantity must be ≥ 1**  
   *If not → 400 BAD REQUEST*  
-  **Response:** `Order item quantity must be at least 1`
+  **Response:** `"Order item quantity must be at least 1"`
 
+#### **Product Validations (via Catalog Service)**
+- **Product SKU must exist**  
+  *If not → 404 NOT FOUND*  
+  **Response:** `"Unknown SKU: p-1001"`
 
-**Note:** Normally, unit price should come from Catalog Service. For now, request body accepts unitPrice.
+- **Product status must be ACTIVE**  
+  *If not → 409 CONFLICT*  
+  **Response:** `"Product is not active"`
+
 
 **Success Response - 201 Created**
 
@@ -105,10 +112,10 @@ Create a new order.
     "id": 1,
     "customerId": 1,
     "totalAmount": 20,
-    "orderItems": [
+    "items": [
         {
           "productSku": "p-1001",
-          "productName": "todo",
+          "productName": "x-product",
           "unitPrice": 20,
           "quantity": 1
         }
@@ -126,20 +133,20 @@ Returns a single order by ID.
 
 ```json
 {
-    "id": 1,
-    "customerId": 1,
-    "totalAmount": 20.00,
-    "items": [
+  "id": 1,
+  "customerId": 1,
+  "totalAmount": 20.00,
+  "items": [
     {
-        "productSku": "p-1001",
-        "productName": "todo",
-        "unitPrice": 20.00,
-        "quantity": 1
-      }
-    ],
-    "orderStatus": "NEW",
-    "createdAt": "2025-11-24T14:31:05.6040613"
-  }
+      "productSku": "p-1001",
+      "productName": "x-product",
+      "unitPrice": 20.00,
+      "quantity": 1
+    }
+  ],
+  "orderStatus": "NEW",
+  "createdAt": "2025-11-24T14:31:05.6040613"
+}
 ```
 
 **Error Responses**
@@ -183,12 +190,12 @@ Returns a single order by ID.
 
 ```json
 {
-    "content": [ ],
-    "pageable": { },
-    "totalPages": 1,
-    "totalElements": 1,
-    "last": true,
-    "number": 0,
-    "size": 10
+  "content": [ ],
+  "pageable": { },
+  "totalPages": 1,
+  "totalElements": 1,
+  "last": true,
+  "number": 0,
+  "size": 10
 }
 ```
